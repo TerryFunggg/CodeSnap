@@ -64,10 +64,12 @@ var greeting = "Hello!"
 if let name = optionalName {
     greeting = "Hello, \(name)"
 }
-
+// Another way to handle optional values
 let nickName : String? = nil
 let fullName : String = "John Applessed"
-let informanlGreeting ="Hi \(nickName ?? fullName)"
+let informanlGreeting = "Hi \(nickName ?? fullName)"
+
+
 
 
 
