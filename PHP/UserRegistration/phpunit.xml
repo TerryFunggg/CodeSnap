@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit bootstrap="vendor/autoload.php"
+         printerClass="Codedungeon\PHPUnitPrettyResultPrinter\Printer"
+         colors="true"
+         verbose="true"
+         stopOnFailure="false">
+
+    <testsuites>
+        <testsuite name="Test suite">
+            <directory>tests/unit</directory>
+        </testsuite>
+    </testsuites>
+
+</phpunit>
