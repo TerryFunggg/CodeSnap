@@ -14,6 +14,8 @@ class DBConfigTest extends TestCase
     {
         $this->assertFileIsReadable(__DIR__.'/../../setting.ini');
     }
+
+
 //    /**@after */
 //    final public function getConnection(){
 //        $db = new DB();

@@ -1,6 +1,6 @@
 <?php
-use \App\Library\DB;
-use \App\Model\User;
+
+include '../Model/User.php';
 include '../Library/common.php';
 include '../Library/functions.php';
 
@@ -8,15 +8,13 @@ session_start();
 header('Cache-control: private');
 ob_start();
 ?>
-<form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>">
+<form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
     <table>
         <tr>
             <td><label for="username">Username</label> </td>
             <td><input type="text" name="username" id="username"
-                       value="<?php if(isset($_POST['username']))
-                                    echo htmlspecialchars($_POST['username']);
-                                ?>
-                           "/></td>
+                       value="<?php if(isset($_POST['username'])){
+                           echo $_POST['username'];} ?>"/></td>
         </tr>
         <tr>
             <td><label for="password">Password</label> </td>
@@ -30,24 +28,18 @@ ob_start();
             <td><label for="email">Email</label> </td>
             <td><input type="text" name="email" id="email"
                        value="<?php
-                                if(isset($_POST['email']))
-                                    echo htmlspecialchars($_POST['email']);
-                         ?>"/></td>
+                                if(isset($_POST['email'])){
+                                    echo $_POST['email'];}?>"/></td>
         </tr>
         <tr>
             <td><label for="captcha">Verify</label> </td>
             <td>Enter text seen in this image <br/ >
-                <img src="img/captcha.php?nocache=<?echo time(); ?>" alt=""/><br>
-                <input type="text" name="captcha" id="captcha"
-                       value="<?php
-                       if(isset($_POST['email']))
-                           echo htmlspecialchars($_POST['email']);
-                       ?>"/></td>
+                <img src="img/captcha.php?nocache=<?php echo time(); ?>" alt=""/><br>
+                <input type="text" name="captcha" id="captcha"/></td>
         </tr>
         <tr>
-            <td></td>
-            <td><input type="submit" value="Sign Up"></td>
-            <td><input type="hidden" name="submitted" value="1"></td>
+            <td><input type="hidden" name="submitted" id="submitted" value="1" ></td>
+            <td><input type="submit" value="Sign Up"/></td>
         </tr>
     </table>
 </form>
@@ -57,6 +49,7 @@ $form = ob_get_clean();
 // show the form if this is the first time the page is viewed
 if(!isset($_POST['submitted']))
 {
+    //header("Content-Type:multipart/form-data");
     $GLOBALS['TEMPLATE']['content'] = $form;
 }
 else { //else process incoming data
@@ -71,7 +64,8 @@ else { //else process incoming data
 
     // check the user name,email,password,captcha are validate
     if (User::validateUsername($_POST['username']) && $password
-            && User::validateEmailAddress($_POST['email']) && $captcha){
+            && User::validateEmailAddress($_POST['email']) && $captcha)
+    {
         $user = User::getByUsername($_POST['username']);
         // check the name already exist or not, if true, user should input other user name
         if ($user->user_id){
@@ -84,10 +78,20 @@ else { //else process incoming data
             $user->password = $password;
             $user->email_addr = $_POST['email'];
             $token = $user->setInactive();
+            // email message
+            $message = 'Thank you for signing up for an account!'
+                .'before you can login you need to verify your account.'
+                .'You can do so by visiting http://www.example.com/verify.php?'
+                ."uid=$user->user_id&token=$token.";
 
-            $GLOBALS['TEMPLATE']['content'] = '<p><strong>Thank you for registering</strong></p>'
-                .'<p>Be sure to verify your account by visiting <a href="verify.php?uid='
-                ."{$user->user_id}&token={$token}>verify.php?uid={$user->user_id}&token={$token}</a></p>";
+            if(@mail($user->email_addr, 'Active your new account',$message))
+            {
+                $headers = array('MIME-Version: 1.0','Content-Type: text/html; charset="iso-8859-1"');
+                $GLOBALS['TEMPLATE']['content'] = '<p><strong>Thank you for registering</strong></p>'
+                    .'<p>You will be receiving an email shortly with instructions on activating your account</p>';
+            }else{
+                $GLOBALS['TEMPLATE']['content'] = '<p><strong>There was an error sending email</strong></p>';
+            }
         }
     }else{ // if those data is invalid
         $GLOBALS['TEMPLATE']['content'] .= "<p><strong>You provide some invalid data.</strong></p>";

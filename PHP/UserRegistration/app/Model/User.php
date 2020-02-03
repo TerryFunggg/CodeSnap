@@ -1,8 +1,7 @@
 <?php
-namespace App\Model;
-use App\Library\DB;
-use PDO;
-use PDOStatement;
+//namespace App\Model;
+require_once "./../Library/DB.php";
+
 //include __DIR__.'/../Library/functions.php';
 class User
 {
@@ -15,7 +14,7 @@ class User
             'username'=>'',
             'password'=>'',
             'email_addr'=>'',
-            'is_active'=>false
+            'is_active'=> 0
         ];
     }
 
@@ -53,13 +52,8 @@ class User
         $db = new DB();
         $statement = $db->prepare("SELECT * FROM USER WHERE user_id = :id");
         $statement->bindValue(':id',$user_id);
-        if($statement->execute() && $row = $statement->fetch(PDO::FETCH_ASSOC)) {
-            $user->username = $row['username'];
-            $user->password = $row['password'];
-            $user->email_addr = $row['email_addr'];
-            $user->isActive = $row['is_active'];
-            $user->user_id = $row['user_id'];
-            return $user;
+        if($statement->execute()) {
+           return $user->fetchRowFromDB($statement,$user);
         }
         return false;
     }
@@ -70,14 +64,9 @@ class User
         $db = new DB();
         $statement = $db->prepare("SELECT * FROM USER WHERE username = :name");
         $statement->bindValue(':name',$username);
-        $statement->execute();
-        if($statement->execute() && $row = $statement->fetch(PDO::FETCH_ASSOC)) {
-            $user->username = $row['username'];
-            $user->password = $row['password'];
-            $user->email_addr = $row['email_addr'];
-            $user->isActive = $row['is_active'];
-            $user->user_id = $row['user_id'];
-            return $user;
+
+        if($statement->execute()) {
+            return $user->fetchRowFromDB($statement,$user);
         }
         return false;
     }
@@ -92,7 +81,7 @@ class User
             $this->bindAllValues($statement,$this->fields);
             return $statement->execute();
         }else{
-            $statement = $db->prepare("INSERT INTO USER(USERNAME, PASSWORD, EMAIL_ADDR, IS_ACTIVE) VALUES(:username,:password,:email_addr,:is_active)");
+            $statement = $db->prepare("INSERT INTO USER (username, password, email_addr, is_active) VALUES (:username,:password,:email_addr,:is_active)");
             $this->bindAllValues($statement,$this->fields);
             return $statement->execute();
         }
@@ -100,12 +89,13 @@ class User
 
     public function setInactive() : bool
     {
-        $this->is_active = false;
+        $this->is_active = 0;
         $this->save();
+        $user = self::getByUsername($this->username);
         $db = new DB();
         $token = random_text(5);
         $statement = $db->prepare("INSERT INTO PENDING (USER_ID, TOKEN) VALUES (:uid,:cd)");
-        $statement->bindValue(":uid",$this->user_id);
+        $statement->bindValue(":uid",$user->user_id);
         $statement->bindValue(':cd',$token);
         return $statement->execute();
     }
@@ -126,7 +116,7 @@ class User
             if(!$statement->execute()){
                     return false;
             }else{
-                $this->is_active = true;
+                $this->is_active = 1;
                 return $this->save();
             }
         }
@@ -147,6 +137,16 @@ class User
                 $statement->bindValue(':'.$param,$value);
         }
         return $statement;
+    }
+
+    public function fetchRowFromDB(PDOStatement $statement , User $user){
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        $user->username = $row['username'];
+        $user->password = $row['password'];
+        $user->email_addr = $row['email_addr'];
+        $user->isActive = $row['is_active'];
+        $user->user_id = $row['user_id'];
+        return $user;
     }
 
 }

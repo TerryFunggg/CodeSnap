@@ -132,7 +132,7 @@ class UserTest extends TestCase
 
     public function testUserGetById_Failure(){
         // Assume no user_id:2 in db
-        $user = \App\Model\User::getById(2);
+        $user = \App\Model\User::getById(100);
         $this->assertFalse($user);
 
     }
@@ -159,7 +159,7 @@ class UserTest extends TestCase
 
     public function testUserGetById_Check_IS_Active(){
         $user = \App\Model\User::getById(1);
-        $this->assertFalse($user->is_active);
+        $this->assertEquals(0,$user->is_active);
     }
 
     public function testUserGetByUserName_OK(){
@@ -194,7 +194,7 @@ class UserTest extends TestCase
 
     public function testUserGetByUserName_Check_IS_Active(){
         $user = \App\Model\User::getByUsername('terry');
-        $this->assertFalse($user->is_active);
+        $this->assertEquals(0,$user->is_active);
     }
 
     public function testSave()
@@ -209,9 +209,18 @@ class UserTest extends TestCase
         $this->assertTrue($this->user->save());
     }
 
-//    function testSetActive(){
-//        $this->user->setActive();
-//    }
+    function testSetInActive(){
+        $user = new \App\Model\User();
+        $user->username = "Peter";
+        $user->password = "123456";
+        $user->email_addr = "peter@gmail.com";
+        $this->assertTrue($user->setInactive());
+        $db = new DB();
+        $statement = $db->prepare("TRUNCATE TABLE PENDING ");
+        $statement->execute();
+        $statement = $db->prepare("DELETE FROM USER WHERE username = 'Peter'");
+        $this->assertTrue($statement->execute());
+    }
 
 
 }

@@ -1,7 +1,4 @@
 <?php
-namespace App\Library;
-use PDO;
-use PDOException;
 
 class DB extends PDO
 {

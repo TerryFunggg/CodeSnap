@@ -1,5 +1,6 @@
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>
         <?php
                 if (!empty($GLOBALS['TEMPLATE']['title'])){
@@ -31,7 +32,8 @@
     ?>
 </div>
     <div id="footer">
-        Copyright &copy;<?php echo date('Y');?></div>
+        Copyright &copy;<?php echo date('Y');?>
     </div>
+
 </body>
 </html>
