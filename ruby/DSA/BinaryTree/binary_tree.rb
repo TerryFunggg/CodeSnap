@@ -1,42 +1,45 @@
 class Node
-  attr_accessor :value, :parent, :left, :right
+  attr_accessor :value, :left, :right
 
-  def initialize(value, parent: nil)
-    @value = value
-    @parent = parent
+  def initialize(value)
+      @value = value
   end
 
-  def add_child(child_value)
-    if child_value < value
-      return self.left = Node.new(child_value) if left.nil?
+  def add_node(node)
+      if node.value < value
+          return self.left = node if left.nil?
 
-      left.add_child(child_value)
-    else
-      return self.right = Node.new(child_value) if right.nil?
+          left.add_node node
+      else
+          return self.right = node if right.nil?
 
-      right.add_child(child_value)
-    end
+          right.add_node node
+      end
   end
 
   def to_s
-    "#{left} #{value} #{right}".strip
+      "#{left} #{value} #{right}".strip
+  end
+
+  def to_post_order
+      "#{value} #{left} #{right}".strip
   end
 end
 
-class BinaryTree
-  attr_accessor :root
+class Tree
 
   def initialize
-    @root = nil
+      @root = nil
   end
 
   def add(value)
-    # save navigation operator
-    @root&.add_child(value)
-    @root = Node.new(value) if @root.nil?
+      node = Node.new(value)
+      return @root = node if @root.nil?
+      
+      @root.add_node node
   end
 
   def to_s
-    @root.to_s
+      @root.to_s
   end
 end
