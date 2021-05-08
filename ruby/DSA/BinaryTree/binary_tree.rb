@@ -26,10 +26,16 @@ class Node
   end
 end
 
-class Tree
+class BinaryTree
 
   def initialize
       @root = nil
+  end
+
+  def build(list)
+    return unless list.kind_of?(Array)
+    @root = nil
+    list.each { |value| add(value) }
   end
 
   def add(value)
